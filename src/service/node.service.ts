@@ -9,7 +9,7 @@ const getNodeLinkService = () => {
         json_agg(json_build_object('id', todo_id, 'desc', td.desc)) AS todos
       FROM
         tag t
-      LEFT JOIN 
+      RIGHT JOIN 
         todo td ON t.tag_id = td.tag_id
       WHERE
         td.del_dt IS NULL
