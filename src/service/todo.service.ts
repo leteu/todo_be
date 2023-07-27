@@ -46,7 +46,7 @@ const updateTodoService = (id: number, desc: string, tagId: number, done: boolea
         ${tagId !== undefined ? `"tag_id" = $3,` : ''}
         ${done !== undefined ? `"done" = $4,` : ''}
         "mod_dt" = to_timestamp($5)
-      WHERE "tag_id" = $1
+      WHERE "todo_id" = $1
     `,
     [id, desc, tagId, done, (Date.now() / 1000.0)]
   )
