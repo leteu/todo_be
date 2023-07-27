@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 
-import { selectTagService, updateTagService, insertTagService, deleteTageService } from 'service/tag.service'
+import { selectTagService, updateTagService, insertTagService, deleteTageService, selectTagLikedTodosService } from 'service/tag.service'
 
 const getTagList = async (req: Request, res: Response) => {
   const limit = req.body?.limit || 10
@@ -46,6 +46,16 @@ const deleteTag = async (req: Request, res: Response) => {
 
   try {
     if (!id) throw new Error()
+
+    const tagLinkedTodos = await selectTagLikedTodosService(Number(id))
+
+    if (tagLinkedTodos.rowCount) {
+      return res.status(500).json({
+        contents: tagLinkedTodos.rows,
+        total: tagLinkedTodos.rowCount,
+        message: `ERROR: tag id ${id} has todo`
+      })
+    }
   
     await deleteTageService(Number(id))
   
