@@ -1,19 +1,20 @@
 import { Request, Response } from 'express'
 
-import { selectTagService, updateTagService, insertTagService, deleteTageService, selectTagLikedTodosService } from 'service/tag.service'
+import { selectTagService, updateTagService, insertTagService, deleteTageService, selectTagLikedTodosService, selectTagRecordCountService } from 'service/tag.service'
 
 const getTagList = async (req: Request, res: Response) => {
   const limit = req.body?.limit || 10
   const page = (req.body?.page - 1) || 0
 
   try {
+    const total = await selectTagRecordCountService()
     const result = await selectTagService(limit, page)
 
     return res
       .status(200)
       .json({
         contents: result.rows,
-        total: result.rowCount,
+        total,
         page: page + 1,
         limit,
       })

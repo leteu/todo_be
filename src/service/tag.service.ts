@@ -1,5 +1,11 @@
 import { dbClient } from '@/app'
 
+const selectTagRecordCountService = async () => {
+  const { rows: [{ count }] } = await dbClient.query(`SELECT count(*) FROM tag`)
+
+  return Number(count)
+}
+
 const selectTagService = (limit: number, page: number) => {
   return dbClient.query(
     `SELECT * FROM tag ORDER BY "tag_id" DESC LIMIT $1 OFFSET $2`,
@@ -39,6 +45,7 @@ const deleteTageService = (id: number) => {
 }
 
 export {
+  selectTagRecordCountService,
   selectTagService,
   updateTagService,
   insertTagService,

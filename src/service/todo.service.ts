@@ -1,5 +1,20 @@
 import { dbClient } from '@/app'
 
+const selectTodoRecordCountService = async (type: 'list' | 'archive' | 'all' = 'list'): Promise<number> => {
+  const { rows: [{ count }] } = await dbClient.query(
+    `
+      SELECT
+        count(*)
+      FROM
+        todo
+      ${type === 'list' ? 'WHERE todo.del_dt IS NULL' : ''}
+      ${type === 'archive' ? 'WHERE todo.del_dt IS NOT NULL' : ''}
+    `
+  )
+
+  return Number(count)
+}
+
 const selectTodoService = (limit: number, page: number) => {
   return dbClient.query(
     `
@@ -33,7 +48,31 @@ const selectTodoService = (limit: number, page: number) => {
 
 const selectTodoArchiveService = (limit: number, page: number) => {
   return dbClient.query(
-    `SELECT * FROM todo WHERE "del_dt" IS NOT NULL ORDER BY "todo_id" DESC LIMIT $1 OFFSET $2`,
+    `
+      SELECT
+        td.todo_id AS "id",
+        td."desc" AS "desc",
+        td.done AS "done",
+        td.reg_dt AS "regDt",
+        td.mod_dt AS "modDt",
+        td.del_dt AS "delDt",
+        jsonb_build_object('id', t.tag_id, 'desc', t.desc) AS tag
+      FROM
+        todo td
+      INNER JOIN
+        tag t ON td.tag_id = t.tag_id
+      WHERE
+        td.del_dt IS NOT NULL
+      GROUP BY 
+        td.todo_id,
+        t.tag_id
+      ORDER by
+        td.todo_id desc
+      limit
+        $1
+      OFFSET
+        $2
+    `,
     [limit, page * limit]
   )
 }
@@ -69,6 +108,7 @@ const archiveTodoService = (id: number) => {
 }
 
 export {
+  selectTodoRecordCountService,
   selectTodoService,
   selectTodoArchiveService,
   updateTodoService,

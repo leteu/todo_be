@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 
-import { selectTodoService, selectTodoArchiveService, updateTodoService, insertTodoService, archiveTodoService } from 'service/todo.service'
+import { selectTodoService, selectTodoArchiveService, updateTodoService, insertTodoService, archiveTodoService, selectTodoRecordCountService } from 'service/todo.service'
 
 
 const getTodoList = async (req: Request, res: Response) => {
@@ -8,13 +8,14 @@ const getTodoList = async (req: Request, res: Response) => {
   const page = (req.body?.page - 1) || 0
 
   try {
-    const result = await selectTodoService(limit, page) 
+    const total = await selectTodoRecordCountService('list')
+    const result = await selectTodoService(limit, page)
 
     return res
       .status(200)
       .json({
         contents: result.rows,
-        total: result.rowCount,
+        total,
         page: page + 1,
         limit,
       })
@@ -28,13 +29,14 @@ const getTodoArchiveList = async (req: Request, res: Response) => {
   const page = (req.body?.page - 1) || 0
 
   try {
+    const total = await selectTodoRecordCountService('archive')
     const result = await selectTodoArchiveService(limit, page) 
 
     return res
       .status(200)
       .json({
         contents: result.rows,
-        total: result.rowCount,
+        total,
         page: page + 1,
         limit,
       })
